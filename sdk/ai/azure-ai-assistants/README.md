@@ -1,45 +1,86 @@
+# copied from azure-ai-inference 
 
+# Azure AI Model Inference client library tests for Python
 
-# Azure Ai Assistants client library for Python
-<!-- write necessary description of service -->
+The instructions below are for running tests locally, on a Windows machine, against the live service.
 
-## Getting started
+## Prerequisites
 
-### Install the package
+The live tests were written against the AI models mentioned below. You will need to deploy these two in [Azure AI Studio](https://ai.azure.com/) and have the endpoint and key for each one of them.
+
+- `Mistral-Large` for chat completion tests, including tool tests
+- `Cohere-embed-v3-english` for embedding tests
+<!-- - `TBD` for image generation tests -->
+
+In addition, you will need to deploy a gpt-4o model in the Azure OpenAI Studio, and have the endpoint and key for it:
+
+- `gpt-4o` on Azure OpenAI (AOAI), for chat completions tests with image input
+
+## Setup
+
+- Clone or download this sample repository.
+- Open a command prompt window in the folder `sdk\ai\azure-ai-inference`.
+- If you want to run tests against the latest published client library, install it by running:
+   ```bash
+   pip install azure-ai-inference
+   ```
+- If you want to run tests against a locally built client library:
+    - First build the wheel:
+        ```bash
+        pip install wheel
+        pip install -r dev_requirements.txt
+        python setup.py bdist_whee
+        ```
+    - Then install the resulting local wheel (update version `1.0.0b2` to the current one):
+        ```bash
+        pip install dist\azure_ai_inference-1.0.0b2-py3-none-any.whl --user --force-reinstall
+        ```
+
+## Set environment variables
+
+Here is the list of environment variables used by the tests:
 
 ```bash
-python -m pip install azure-ai-assistants
+# For chat completions test, including tools
+set AZURE_AI_CHAT_ENDPOINT=https://<endpoint-name>.<azure-region>.models.ai.azure.com
+set AZURE_AI_CHAT_KEY=<32-char-api-key>
+
+# For chat completions tests using image input
+set AZURE_OPENAI_CHAT_ENDPOINT=https://<endpont-name>.openai.azure.com/openai/deployments/gpt-4o
+set AZURE_OPENAI_CHAT_KEY=<32-char-api-key>
+
+# For text embedding tests
+set AZURE_AI_EMBEDDINGS_ENDPOINT=https://<endpoint-name>.<azure-region>.models.ai.azure.com
+set AZURE_AI_EMBEDDINGS_KEY=<32-char-api-key>
 ```
 
-#### Prequisites
+In addition, the following environment values **must be** defined, although not used. Assign any value to them:
 
-- Python 3.8 or later is required to use this package.
-- You need an [Azure subscription][azure_sub] to use this package.
-- An existing Azure Ai Assistants instance.
+```bash
+set AI_TENANT_ID=not-used
+set AI_CLIENT_ID=not-used
+set AI_CLIENT_SECRET=not-used
+```
 
-## Contributing
+## Configure test proxy
 
-This project welcomes contributions and suggestions. Most contributions require
-you to agree to a Contributor License Agreement (CLA) declaring that you have
-the right to, and actually do, grant us the rights to use your contribution.
-For details, visit https://cla.microsoft.com.
+Configure the test proxy to run live service tests without recordings:
 
-When you submit a pull request, a CLA-bot will automatically determine whether
-you need to provide a CLA and decorate the PR appropriately (e.g., label,
-comment). Simply follow the instructions provided by the bot. You will only
-need to do this once across all repos using our CLA.
+```bash
+set AZURE_TEST_RUN_LIVE=true
+set AZURE_SKIP_LIVE_RECORDING=true
+set PROXY_URL=http://localhost:5000
+set AZURE_TEST_USE_CLI_AUTH=true
+```
 
-This project has adopted the
-[Microsoft Open Source Code of Conduct][code_of_conduct]. For more information,
-see the Code of Conduct FAQ or contact opencode@microsoft.com with any
-additional questions or comments.
+## Run tests
 
-<!-- LINKS -->
-[code_of_conduct]: https://opensource.microsoft.com/codeofconduct/
-[authenticate_with_token]: https://docs.microsoft.com/azure/cognitive-services/authentication?tabs=powershell#authenticate-with-an-authentication-token
-[azure_identity_credentials]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/identity/azure-identity#credentials
-[azure_identity_pip]: https://pypi.org/project/azure-identity/
-[default_azure_credential]: https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/identity/azure-identity#defaultazurecredential
-[pip]: https://pypi.org/project/pip/
-[azure_sub]: https://azure.microsoft.com/free/
+To run all tests, type:
 
+```bash
+pytest
+```
+
+## Additional information
+
+See [test documentation](https://github.com/Azure/azure-sdk-for-python/blob/main/doc/dev/tests.md) for additional information, including how to set proxy recordings and run tests using recordings.
